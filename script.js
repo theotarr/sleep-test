@@ -15,6 +15,7 @@ class EnhancedAdaptiveSleepNoise {
     this.breathOscillator2 = null;
     this.breathLFO = null;
     this.breathFilter = null;
+    this.lfoGain = null;
 
     // Rhythmic pulse nodes
     this.heartPulseLFO = null;
@@ -356,10 +357,10 @@ class EnhancedAdaptiveSleepNoise {
 
     const wave1Gain = this.audioContext.createGain();
     const wave2Gain = this.audioContext.createGain();
-    const lfoGain = this.audioContext.createGain();
+    this.lfoGain = this.audioContext.createGain();
     wave1Gain.gain.value = 0.4;
     wave2Gain.gain.value = 0.6;
-    lfoGain.gain.value = 1.0;
+    this.lfoGain.gain.value = 1.0;
 
     this.breathFilter = this.audioContext.createBiquadFilter();
     this.breathFilter.type = "bandpass";
@@ -371,7 +372,7 @@ class EnhancedAdaptiveSleepNoise {
 
     this.breathOscillator1.connect(wave1Gain);
     this.breathOscillator2.connect(wave2Gain);
-    this.breathLFO.connect(lfoGain).connect(this.breathGain.gain);
+    this.breathLFO.connect(this.lfoGain).connect(this.breathGain.gain);
     wave1Gain.connect(this.breathFilter);
     wave2Gain.connect(this.breathFilter);
     this.breathFilter.connect(this.breathGain);
@@ -436,6 +437,7 @@ class EnhancedAdaptiveSleepNoise {
     const noiseBaseVol = heartOn ? noiseVolume * 0.5 : 0;
     const pulseDepth = heartOn ? noiseVolume * 0.08 : 0; // Proportional pulse depth
     const breathVol = breathOn ? breathVolume * 0.6 : 0;
+    const lfoVol = breathOn ? 1.0 : 0;
 
     this.noiseGain.gain.setTargetAtTime(
       noiseBaseVol,
@@ -446,6 +448,14 @@ class EnhancedAdaptiveSleepNoise {
     if (this.heartPulseDepth) {
       this.heartPulseDepth.gain.setTargetAtTime(
         pulseDepth,
+        this.audioContext.currentTime,
+        0.1
+      );
+    }
+
+    if (this.lfoGain) {
+      this.lfoGain.gain.setTargetAtTime(
+        lfoVol,
         this.audioContext.currentTime,
         0.1
       );
