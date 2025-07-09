@@ -136,6 +136,12 @@ class EnhancedAdaptiveSleepNoise {
       document.getElementById("breathVolumeValue").textContent = e.target.value;
       if (this.isPlaying) this.updateVolume();
     });
+    document.getElementById("heartToggle").addEventListener("change", () => {
+      if (this.isPlaying) this.updateVolume();
+    });
+    document.getElementById("breathToggle").addEventListener("change", () => {
+      if (this.isPlaying) this.updateVolume();
+    });
     document.querySelectorAll(".noise-type").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         if (this.currentNoiseType === e.target.dataset.type) {
@@ -418,14 +424,18 @@ class EnhancedAdaptiveSleepNoise {
 
   updateVolume() {
     if (!this.isPlaying) return;
+
+    const heartOn = document.getElementById("heartToggle").checked;
+    const breathOn = document.getElementById("breathToggle").checked;
+
     const noiseVolume =
       parseInt(document.getElementById("noiseVolume").value) / 100;
     const breathVolume =
       parseInt(document.getElementById("breathVolume").value) / 100;
 
-    const noiseBaseVol = noiseVolume * 0.5;
-    const pulseDepth = noiseVolume * 0.08; // Proportional pulse depth
-    const breathVol = breathVolume * 0.6;
+    const noiseBaseVol = heartOn ? noiseVolume * 0.5 : 0;
+    const pulseDepth = heartOn ? noiseVolume * 0.08 : 0; // Proportional pulse depth
+    const breathVol = breathOn ? breathVolume * 0.6 : 0;
 
     this.noiseGain.gain.setTargetAtTime(
       noiseBaseVol,
